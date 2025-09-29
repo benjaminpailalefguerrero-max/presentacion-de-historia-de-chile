@@ -1,0 +1,122 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentación: Historia de Chile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        section {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        p {
+            line-height: 1.6;
+            color: #333;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+            border-radius: 4px;
+        }
+        nav {
+            text-align: center;
+            margin: 20px 0;
+        }
+        nav a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #3498db;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 style="text-align: center; padding: 20px; background-color: #3498db; color: white; margin: 0;">Historia de Chile: Una Presentación</h1>
+    </header>
+    
+    <nav>
+        <a href="#seccion1">Sección 1</a>
+        <a href="#seccion2">Sección 2</a>
+        <a href="#seccion3">Sección 3</a>
+    </nav>
+    
+    <section id="seccion1">
+        <h2>Período Precolombino</h2>
+        <p>Antes de la llegada de los europeos, Chile estaba habitado por diversas culturas indígenas. Los mapuches en el sur, los aimaras en el norte y los incas que extendieron su imperio hasta el centro del país. Estas sociedades desarrollaron agricultura, cerámica y sistemas sociales complejos.</p>
+        <img src="images/historia1.jpg" alt="Cultura precolombina en Chile">
+    </section>
+    
+    <section id="seccion2">
+        <h2>Período Colonial</h2>
+        <p>En 1541, Pedro de Valdivia fundó Santiago, iniciando la colonización española. Chile formó parte del Virreinato del Perú y luego del Río de la Plata. La economía se basó en la minería y la agricultura, con conflictos constantes con los mapuches en la Guerra de Arauco.</p>
+        <img src="images/historia2.jpg" alt="Época colonial en Chile">
+    </section>
+    
+    <section id="seccion3">
+        <h2>Independencia y Época Moderna</h2>
+        <p>La independencia de Chile se inició en 1810 y se consolidó en 1818 con la victoria en la Batalla de Maipú, liderada por Bernardo O'Higgins y José de San Martín. En el siglo XX, Chile experimentó reformas sociales, dictaduras y transiciones democráticas, destacando el gobierno de Salvador Allende y el régimen de Augusto Pinochet.</p>
+        <img src="images/historia3.jpg" alt="Independencia y historia moderna de Chile">
+    </section>
+    
+    <footer style="text-align: center; padding: 10px; background-color: #2c3e50; color: white; margin-top: 20px;">
+        <p>Presentación generada por Grok. © 2025</p>
+    </footer>
+</body>
+</html>
